@@ -78,7 +78,7 @@ export default function CarnetPage() {
         )}
       </div>
 
-      <div className="mt-4 flex gap-2">
+      <div className="mt-4 flex flex-wrap gap-2">
         <Button variant="secondary" className="gap-2" onClick={handleDescargarPng} disabled={!pngBlob}>
           <Download size={16} /> Descargar PNG
         </Button>

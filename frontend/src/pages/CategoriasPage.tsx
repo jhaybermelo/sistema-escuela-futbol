@@ -109,7 +109,7 @@ export default function CategoriasPage() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold text-slate-800">Categorías</h1>
         {isAdmin && (
           <Button onClick={openCreate} className="gap-2">
@@ -173,7 +173,7 @@ export default function CategoriasPage() {
               value={form.nombre}
               onChange={(e) => setForm({ ...form, nombre: e.target.value })}
             />
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <Input
                 label="Año nacimiento mínimo"
                 type="number"

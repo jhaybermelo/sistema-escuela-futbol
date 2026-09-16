@@ -39,7 +39,7 @@ export default function NotificacionesLogPage() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold text-slate-800">Notificaciones</h1>
         <Button className="gap-2" onClick={() => enviarMutation.mutate()} disabled={enviarMutation.isPending}>
           <Send size={16} /> Enviar recordatorios ahora

@@ -36,6 +36,7 @@ class ReciboConcepto(BaseModel):
 
 class ReciboDataResponse(BaseModel):
     numero_recibo: str
+    token: str
     fecha: date
     alumno_nombre: str
     categoria_nombre: str

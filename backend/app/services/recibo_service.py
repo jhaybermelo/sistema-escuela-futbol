@@ -5,6 +5,7 @@ from app.schemas.pago import ReciboDataResponse
 def pago_to_recibo_data(pago: Pago) -> ReciboDataResponse:
     return ReciboDataResponse(
         numero_recibo=f"{pago.id:04d}",
+        token=pago.token,
         fecha=pago.fecha_pago,
         alumno_nombre=pago.alumno_nombre,
         categoria_nombre=pago.categoria_nombre,

@@ -6,9 +6,19 @@
   min-height: 100vh;
 }
 
+@media (max-width: 640px) {
+  .recibo-page {
+    padding: 12px;
+  }
+}
+
+.receipt-scale-wrapper {
+  width: 100%;
+  overflow: hidden;
+}
+
 .receipt {
   width: 1120px;
-  max-width: 100%;
   min-height: 720px;
   margin: auto;
   background: #fff;
@@ -16,6 +26,7 @@
   overflow: hidden;
   border-radius: 8px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  transform-origin: top left;
 }
 
 .header {
@@ -398,6 +409,14 @@
   margin-left: 12px;
 }
 
+.whatsapp-button {
+  background: #25d366;
+}
+
+.whatsapp-button:hover {
+  background: #1da851;
+}
+
 @media print {
   @page {
     size: A4 landscape;
@@ -409,11 +428,18 @@
     padding: 0;
   }
 
+  .receipt-scale-wrapper {
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
   .receipt {
-    width: 100%;
+    width: 100% !important;
     min-height: auto;
     box-shadow: none;
     border-radius: 0;
+    transform: none !important;
   }
 
   .actions {

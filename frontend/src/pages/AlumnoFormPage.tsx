@@ -98,7 +98,7 @@ export default function AlumnoFormPage() {
         {isEdit ? 'Editar alumno' : 'Nuevo alumno'}
       </h1>
       <form onSubmit={handleSubmit} className="space-y-4 rounded-lg border border-slate-200 bg-white p-6">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Input
             label="Número de identificación"
             required
@@ -112,7 +112,7 @@ export default function AlumnoFormPage() {
             </span>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Input
             label="Nombres"
             required
@@ -126,7 +126,7 @@ export default function AlumnoFormPage() {
             onChange={(e) => setForm({ ...form, apellidos: e.target.value })}
           />
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Input
             label="Fecha de nacimiento"
             type="date"
@@ -142,7 +142,7 @@ export default function AlumnoFormPage() {
             onChange={(e) => setForm({ ...form, fecha_ingreso: e.target.value })}
           />
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Input
             label="Nombre del acudiente"
             required

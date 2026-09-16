@@ -18,6 +18,7 @@ const MensualidadesPage = lazy(() => import('./pages/MensualidadesPage'))
 const NotificacionesLogPage = lazy(() => import('./pages/NotificacionesLogPage'))
 const UsuariosPage = lazy(() => import('./pages/UsuariosPage'))
 const ReciboPage = lazy(() => import('./pages/ReciboPage'))
+const ReciboPublicoPage = lazy(() => import('./pages/ReciboPublicoPage'))
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
 
 const queryClient = new QueryClient({
@@ -33,6 +34,7 @@ function App() {
           <Suspense fallback={<div className="p-6">Cargando...</div>}>
             <Routes>
               <Route path="/login" element={<LoginPage />} />
+              <Route path="/r/:token" element={<ReciboPublicoPage />} />
               <Route
                 element={
                   <ProtectedRoute>

@@ -1,6 +1,7 @@
+import { useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { clsx } from 'clsx'
-import { LayoutDashboard, Users, Shield, LogOut, Receipt, Settings, Bell, UserCog } from 'lucide-react'
+import { LayoutDashboard, Users, Shield, LogOut, Receipt, Settings, Bell, UserCog, Menu, X } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 
 const navItems = [
@@ -15,12 +16,33 @@ const navItems = [
 
 export function Layout() {
   const { user, logout } = useAuth()
+  const [menuOpen, setMenuOpen] = useState(false)
 
   return (
     <div className="flex min-h-screen bg-slate-50">
-      <aside className="flex w-56 flex-col border-r border-slate-200 bg-white">
-        <div className="border-b border-slate-200 px-4 py-4">
+      {menuOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-black/40 md:hidden"
+          onClick={() => setMenuOpen(false)}
+        />
+      )}
+
+      <aside
+        className={clsx(
+          'fixed inset-y-0 left-0 z-40 flex w-64 -translate-x-full flex-col border-r border-slate-200 bg-white transition-transform duration-200 ease-in-out',
+          'md:relative md:z-auto md:w-56 md:translate-x-0',
+          menuOpen && 'translate-x-0',
+        )}
+      >
+        <div className="flex items-center justify-between border-b border-slate-200 px-4 py-4">
           <h1 className="text-lg font-semibold text-green-700">Escuela de Futbol</h1>
+          <button
+            className="text-slate-400 hover:text-slate-600 md:hidden"
+            onClick={() => setMenuOpen(false)}
+            aria-label="Cerrar menú"
+          >
+            <X size={20} />
+          </button>
         </div>
         <nav className="flex-1 space-y-1 p-3">
           {navItems
@@ -30,6 +52,7 @@ export function Layout() {
                 key={item.to}
                 to={item.to}
                 end={item.to === '/'}
+                onClick={() => setMenuOpen(false)}
                 className={({ isActive }) =>
                   clsx(
                     'flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium',
@@ -55,9 +78,23 @@ export function Layout() {
           </button>
         </div>
       </aside>
-      <main className="flex-1 p-6">
-        <Outlet />
-      </main>
+
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 md:hidden">
+          <button
+            className="text-slate-600 hover:text-slate-800"
+            onClick={() => setMenuOpen(true)}
+            aria-label="Abrir menú"
+          >
+            <Menu size={22} />
+          </button>
+          <h1 className="text-base font-semibold text-green-700">Escuela de Futbol</h1>
+          <div className="w-[22px]" />
+        </header>
+        <main className="flex-1 overflow-x-hidden p-4 md:p-6">
+          <Outlet />
+        </main>
+      </div>
     </div>
   )
 }

@@ -43,11 +43,11 @@ export default function AlumnoDetailPage() {
 
   return (
     <div className="max-w-3xl">
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold text-slate-800">
           {alumno.nombres} {alumno.apellidos}
         </h1>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Link to={`/alumnos/${alumno.id}/carnet`}>
             <Button variant="secondary" className="gap-2">
               <IdCard size={16} /> Ver carnet
@@ -61,8 +61,8 @@ export default function AlumnoDetailPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-6">
-        <div className="col-span-1">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <div className="col-span-1 max-w-xs md:max-w-none">
           <div className="aspect-square overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
             {alumno.foto_path ? (
               <img src={alumno.foto_path} alt="Foto del alumno" className="h-full w-full object-cover" />
@@ -135,7 +135,7 @@ export default function AlumnoDetailPage() {
                   Ver detalle
                 </Link>
               </div>
-              <div className="grid grid-cols-4 gap-3 text-center text-sm">
+              <div className="grid grid-cols-2 gap-3 text-center text-sm sm:grid-cols-4">
                 <div>
                   <div className="text-lg font-semibold text-slate-800">{resumen.total_mensualidades}</div>
                   <div className="text-xs text-slate-500">Total</div>

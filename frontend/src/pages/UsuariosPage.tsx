@@ -29,7 +29,7 @@ export default function UsuariosPage() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold text-slate-800">Usuarios</h1>
         <Button onClick={() => setShowForm(true)} className="gap-2">
           <Plus size={16} /> Nuevo usuario

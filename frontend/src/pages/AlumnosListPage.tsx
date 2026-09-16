@@ -66,9 +66,9 @@ export default function AlumnosListPage() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold text-slate-800">Alumnos</h1>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {isAdmin && (
             <Button
               variant="secondary"
@@ -87,8 +87,8 @@ export default function AlumnosListPage() {
         </div>
       </div>
 
-      <div className="mb-4 flex gap-3">
-        <div className="relative flex-1 max-w-sm">
+      <div className="mb-4 flex flex-wrap gap-3">
+        <div className="relative w-full flex-1 sm:max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
           <Input
             placeholder="Buscar por nombre o identificación..."

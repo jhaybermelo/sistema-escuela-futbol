@@ -11,6 +11,7 @@ export interface Pago {
   recibo_path: string
   referencia: string | null
   observaciones: string | null
+  token: string
   created_at: string
 }
 
@@ -33,6 +34,7 @@ export interface ReciboConcepto {
 
 export interface ReciboData {
   numero_recibo: string
+  token: string
   fecha: string
   alumno_nombre: string
   categoria_nombre: string
@@ -71,4 +73,23 @@ export async function createPago(input: PagoInput) {
 export async function getReciboData(pagoId: number) {
   const { data } = await api.get<ReciboData>(`/pagos/${pagoId}/recibo-data`)
   return data
+}
+
+export async function getReciboDataPublico(token: string) {
+  const { data } = await api.get<ReciboData>(`/public/recibos/${token}`)
+  return data
+}
+
+/** Número en formato internacional para wa.me (asume Colombia si vienen 10
+ * dígitos locales, ej. celular que empieza por 3). */
+export function formatearNumeroWhatsapp(telefono: string): string {
+  const digitos = telefono.replace(/\D/g, '')
+  if (digitos.length === 10 && digitos.startsWith('3')) {
+    return `57${digitos}`
+  }
+  return digitos
+}
+
+export function getReciboPublicoUrl(token: string): string {
+  return `${window.location.origin}/r/${token}`
 }
