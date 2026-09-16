@@ -1,0 +1,78 @@
+services:
+  postgres-db:
+    image: postgres:15
+    container_name: escuela-futbol-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      TZ: America/Bogota
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - escuela-futbol-net
+    # Sin "ports:" a propósito: en producción Postgres solo debe ser
+    # alcanzable dentro de la red interna de Docker, nunca desde internet.
+
+  backend:
+    build: ./backend
+    container_name: escuela-futbol-backend
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - uploads:/app/uploads
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+    # Un solo worker, sin --reload: el scheduler (APScheduler) corre dentro del
+    # mismo proceso, así que más de un worker duplicaría los jobs automáticos
+    # (generación de mensualidades y recordatorios).
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+    networks:
+      - escuela-futbol-net
+    # Sin "ports:" a propósito: el backend solo se alcanza a través del
+    # frontend (nginx), que lo referencia por nombre de contenedor.
+
+  frontend:
+    build: ./frontend
+    container_name: escuela-futbol-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    networks:
+      - escuela-futbol-net
+    # Sin "ports:" a propósito: Caddy es el único servicio expuesto a
+    # internet (80/443) y reenvía el tráfico hacia este contenedor.
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: escuela-futbol-caddy
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - frontend
+    networks:
+      - escuela-futbol-net
+
+volumes:
+  pgdata:
+  uploads:
+  caddy_data:
+  caddy_config:
+
+networks:
+  escuela-futbol-net:
+    driver: bridge
