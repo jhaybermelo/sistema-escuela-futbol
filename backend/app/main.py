@@ -17,6 +17,7 @@ from app.routers import (
     pagos,
     notificaciones,
     dashboard,
+    reportes,
     public,
 )
 
@@ -53,6 +54,7 @@ app.include_router(mensualidades.router, prefix="/api")
 app.include_router(pagos.router, prefix="/api")
 app.include_router(notificaciones.router, prefix="/api")
 app.include_router(dashboard.router, prefix="/api")
+app.include_router(reportes.router, prefix="/api")
 app.include_router(public.router, prefix="/api")
 
 

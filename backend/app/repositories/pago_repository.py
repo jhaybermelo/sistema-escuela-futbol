@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import date
 from decimal import Decimal
 
 from sqlalchemy import select, func, delete
@@ -57,6 +58,25 @@ class PagoRepository:
             setattr(pago, key, value)
         await self.db.flush()
         return pago
+
+    async def list_por_rango(self, desde: date, hasta: date) -> list[Pago]:
+        stmt = (
+            select(Pago)
+            .where(Pago.fecha_pago >= desde, Pago.fecha_pago <= hasta)
+            .order_by(Pago.fecha_pago.desc())
+        )
+        result = await self.db.execute(stmt)
+        return list(result.scalars().all())
+
+    async def resumen_por_metodo(self, desde: date, hasta: date) -> list[tuple[str, Decimal, int]]:
+        stmt = (
+            select(Pago.metodo_pago, func.coalesce(func.sum(Pago.monto), 0), func.count())
+            .where(Pago.fecha_pago >= desde, Pago.fecha_pago <= hasta)
+            .group_by(Pago.metodo_pago)
+            .order_by(Pago.metodo_pago)
+        )
+        result = await self.db.execute(stmt)
+        return list(result.all())
 
     async def delete_historicos(self, mensualidad_id: int) -> None:
         """Elimina los pagos registrados vía el marcado rápido histórico (sin recibo

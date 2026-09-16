@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { clsx } from 'clsx'
-import { LayoutDashboard, Users, Shield, LogOut, Receipt, Settings, Bell, UserCog, Menu, X } from 'lucide-react'
+import { LayoutDashboard, Users, Shield, LogOut, Receipt, Settings, Bell, UserCog, Menu, X, BarChart3 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 
 const navItems = [
@@ -9,6 +9,7 @@ const navItems = [
   { to: '/alumnos', label: 'Alumnos', icon: Users, adminOnly: false },
   { to: '/categorias', label: 'Categorías', icon: Shield, adminOnly: false },
   { to: '/mensualidades', label: 'Mensualidades', icon: Receipt, adminOnly: true },
+  { to: '/reportes', label: 'Reportes', icon: BarChart3, adminOnly: true },
   { to: '/notificaciones', label: 'Notificaciones', icon: Bell, adminOnly: true },
   { to: '/usuarios', label: 'Usuarios', icon: UserCog, adminOnly: true },
   { to: '/config', label: 'Configuración', icon: Settings, adminOnly: true },

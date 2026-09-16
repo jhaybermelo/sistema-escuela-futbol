@@ -16,6 +16,7 @@ const CarnetPage = lazy(() => import('./pages/CarnetPage'))
 const SchoolConfigPage = lazy(() => import('./pages/SchoolConfigPage'))
 const MensualidadesPage = lazy(() => import('./pages/MensualidadesPage'))
 const NotificacionesLogPage = lazy(() => import('./pages/NotificacionesLogPage'))
+const ReportesPage = lazy(() => import('./pages/ReportesPage'))
 const UsuariosPage = lazy(() => import('./pages/UsuariosPage'))
 const ReciboPage = lazy(() => import('./pages/ReciboPage'))
 const ReciboPublicoPage = lazy(() => import('./pages/ReciboPublicoPage'))
@@ -70,6 +71,14 @@ function App() {
                   element={
                     <ProtectedRoute requireAdmin>
                       <NotificacionesLogPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/reportes"
+                  element={
+                    <ProtectedRoute requireAdmin>
+                      <ReportesPage />
                     </ProtectedRoute>
                   }
                 />
