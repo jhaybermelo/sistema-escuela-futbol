@@ -27,6 +27,8 @@ from app.services.categoria_assignment_service import CategoriaAssignmentService
 
 logger = get_logger("importaciones", settings.LOG_DIR)
 
+PREFIJO_NUMERO_PROVISIONAL = "IMP-"
+
 MESES_ES: dict[int, str] = {
     1: "enero", 2: "febrero", 3: "marzo", 4: "abril", 5: "mayo", 6: "junio",
     7: "julio", 8: "agosto", 9: "septiembre", 10: "octubre", 11: "noviembre", 12: "diciembre",
@@ -68,8 +70,14 @@ class ImportacionService:
                 continue
         raise ValueError(f"fecha inválida '{valor}' (se espera dd/mm/aaaa)")
 
+    async def siguiente_numero_identificacion(self) -> int:
+        """Continúa la numeración provisional 'IMP-NNNN' desde el mayor número ya
+        usado en el sistema, en vez de reiniciar cada día — así una segunda
+        importación (u otra en el mismo día) no repite números."""
+        return await self.alumno_repo.get_max_numero_con_prefijo(PREFIJO_NUMERO_PROVISIONAL) + 1
+
     def parse_csv(
-        self, contenido: bytes
+        self, contenido: bytes, numero_inicial: int = 1
     ) -> tuple[list[ImportAlumnoRow], dict[int, list[str]], dict[int, list[str]]]:
         """Parsea el CSV delimitado por ';'. Devuelve las filas parseables y, por
         separado, errores bloqueantes y advertencias por número de fila (para que un
@@ -117,7 +125,6 @@ class ImportacionService:
                 return ""
             return cruda[idx].strip()
 
-        hoy_str = date.today().strftime("%Y%m%d")
         filas: list[ImportAlumnoRow] = []
         errores_parseo: dict[int, list[str]] = {}
         advertencias_parseo: dict[int, list[str]] = {}
@@ -157,7 +164,7 @@ class ImportacionService:
             filas.append(
                 ImportAlumnoRow(
                     fila=n,
-                    numero_identificacion=f"IMP-{hoy_str}-{n:03d}",
+                    numero_identificacion=f"{PREFIJO_NUMERO_PROVISIONAL}{numero_inicial + n - 1:04d}",
                     nombres=nombres,
                     apellidos=apellidos,
                     fecha_nacimiento=fecha_nacimiento,

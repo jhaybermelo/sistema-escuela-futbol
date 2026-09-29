@@ -18,8 +18,9 @@ async def preview_importacion_alumnos(
     """Parsea y valida el CSV sin escribir nada en la base de datos, para revisar y
     corregir antes de confirmar la importación."""
     service = ImportacionService(db)
+    numero_inicial = await service.siguiente_numero_identificacion()
     try:
-        filas, errores_parseo, advertencias_parseo = service.parse_csv(await file.read())
+        filas, errores_parseo, advertencias_parseo = service.parse_csv(await file.read(), numero_inicial)
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 

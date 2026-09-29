@@ -22,6 +22,21 @@ class AlumnoRepository:
         )
         return result.scalar_one_or_none()
 
+    async def get_max_numero_con_prefijo(self, prefijo: str) -> int:
+        """Mayor sufijo numérico entre los numero_identificacion que empiezan con
+        `prefijo` (ej. 'IMP-'), para continuar una numeración provisional
+        incremental. Ignora valores cuyo sufijo no sea puramente numérico (ej. si un
+        admin lo editó a mano)."""
+        result = await self.db.execute(
+            select(Alumno.numero_identificacion).where(Alumno.numero_identificacion.like(f"{prefijo}%"))
+        )
+        maximo = 0
+        for valor in result.scalars().all():
+            sufijo = valor.removeprefix(prefijo)
+            if sufijo.isdigit():
+                maximo = max(maximo, int(sufijo))
+        return maximo
+
     async def list(
         self,
         page: int = 1,
