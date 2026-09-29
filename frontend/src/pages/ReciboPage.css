@@ -14,6 +14,8 @@
 
 .receipt-scale-wrapper {
   width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
   overflow: hidden;
 }
 
@@ -430,13 +432,16 @@
 
   .receipt-scale-wrapper {
     width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
     height: auto !important;
     overflow: visible !important;
   }
 
   .receipt {
-    width: 100% !important;
-    min-height: auto;
+    /* El ancho/alto natural (1120x720, ver regla base) se conserva a propósito:
+       ReciboView aplica un zoom calculado en JS para que quepa en una sola
+       hoja A4 horizontal, en vez de forzar width:100% (que no reduce el alto). */
     box-shadow: none;
     border-radius: 0;
     transform: none !important;

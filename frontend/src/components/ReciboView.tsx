@@ -1,8 +1,16 @@
-import { useLayoutEffect, useRef, type ReactNode } from 'react'
+import { useEffect, useLayoutEffect, useRef, type ReactNode } from 'react'
 import type { ReciboData } from '../api/pagos'
 import '../pages/ReciboPage.css'
 
 const RECEIPT_NATURAL_WIDTH = 1120
+// Debe coincidir con la regla @page (A4 horizontal, márgenes de 8mm) en ReciboPage.css.
+const PRINT_PAGE_WIDTH_MM = 297
+const PRINT_PAGE_HEIGHT_MM = 210
+const PRINT_PAGE_MARGIN_MM = 8
+
+function mmToPx(mm: number) {
+  return (mm * 96) / 25.4
+}
 
 const METODOS = [
   { value: 'efectivo', label: 'Efectivo' },
@@ -46,6 +54,33 @@ export function ReciboView({ data, extraActions }: { data: ReciboData; extraActi
     const observer = new ResizeObserver(updateScale)
     observer.observe(wrapper)
     return () => observer.disconnect()
+  }, [])
+
+  // `transform: scale()` (usado arriba para pantalla) no afecta la paginación de
+  // impresión — el navegador calcula los saltos de página sobre el tamaño en flujo
+  // previo a la transformación. Por eso al imprimir usamos `zoom`, que sí reduce el
+  // tamaño en el flujo, calculado para que el recibo quepa siempre en una sola hoja.
+  useEffect(() => {
+    const receipt = receiptRef.current
+    if (!receipt) return
+
+    function handleBeforePrint() {
+      const availableWidth = mmToPx(PRINT_PAGE_WIDTH_MM - 2 * PRINT_PAGE_MARGIN_MM)
+      const availableHeight = mmToPx(PRINT_PAGE_HEIGHT_MM - 2 * PRINT_PAGE_MARGIN_MM)
+      const zoom = Math.min(1, availableWidth / RECEIPT_NATURAL_WIDTH, availableHeight / receipt!.offsetHeight)
+      receipt!.style.setProperty('zoom', String(zoom))
+    }
+
+    function handleAfterPrint() {
+      receipt!.style.removeProperty('zoom')
+    }
+
+    window.addEventListener('beforeprint', handleBeforePrint)
+    window.addEventListener('afterprint', handleAfterPrint)
+    return () => {
+      window.removeEventListener('beforeprint', handleBeforePrint)
+      window.removeEventListener('afterprint', handleAfterPrint)
+    }
   }, [])
 
   return (

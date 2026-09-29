@@ -73,6 +73,15 @@ class MensualidadRepository:
         items = (await self.db.execute(list_stmt)).scalars().all()
         return list(items), total
 
+    async def list_by_alumno(self, alumno_id: int) -> list[Mensualidad]:
+        stmt = (
+            select(Mensualidad)
+            .where(Mensualidad.alumno_id == alumno_id)
+            .order_by(Mensualidad.periodo_inicio)
+        )
+        result = await self.db.execute(stmt)
+        return list(result.scalars().all())
+
     async def list_pendientes_vencidas(self, hoy: date) -> list[Mensualidad]:
         stmt = select(Mensualidad).where(
             Mensualidad.estado.in_(["pendiente", "parcial"]), Mensualidad.fecha_vencimiento < hoy

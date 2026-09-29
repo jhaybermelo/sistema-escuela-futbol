@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
-import { Plus, Search, RefreshCw, Pencil } from 'lucide-react'
+import { Plus, Search, RefreshCw, Pencil, FileUp } from 'lucide-react'
 import * as alumnosApi from '../api/alumnos'
 import * as categoriasApi from '../api/categorias'
 import * as mensualidadesApi from '../api/mensualidades'
@@ -78,6 +78,13 @@ export default function AlumnosListPage() {
             >
               <RefreshCw size={16} /> Recalcular categorías
             </Button>
+          )}
+          {isAdmin && (
+            <Link to="/alumnos/importar">
+              <Button variant="secondary" className="gap-2">
+                <FileUp size={16} /> Importar CSV
+              </Button>
+            </Link>
           )}
           <Link to="/alumnos/nuevo">
             <Button className="gap-2">

@@ -11,6 +11,7 @@ const DashboardPage = lazy(() => import('./pages/DashboardPage'))
 const CategoriasPage = lazy(() => import('./pages/CategoriasPage'))
 const AlumnosListPage = lazy(() => import('./pages/AlumnosListPage'))
 const AlumnoFormPage = lazy(() => import('./pages/AlumnoFormPage'))
+const AlumnoImportPage = lazy(() => import('./pages/AlumnoImportPage'))
 const AlumnoDetailPage = lazy(() => import('./pages/AlumnoDetailPage'))
 const CarnetPage = lazy(() => import('./pages/CarnetPage'))
 const SchoolConfigPage = lazy(() => import('./pages/SchoolConfigPage'))
@@ -47,6 +48,14 @@ function App() {
                 <Route path="/categorias" element={<CategoriasPage />} />
                 <Route path="/alumnos" element={<AlumnosListPage />} />
                 <Route path="/alumnos/nuevo" element={<AlumnoFormPage />} />
+                <Route
+                  path="/alumnos/importar"
+                  element={
+                    <ProtectedRoute requireAdmin>
+                      <AlumnoImportPage />
+                    </ProtectedRoute>
+                  }
+                />
                 <Route path="/alumnos/:id" element={<AlumnoDetailPage />} />
                 <Route path="/alumnos/:id/editar" element={<AlumnoFormPage />} />
                 <Route path="/alumnos/:id/carnet" element={<CarnetPage />} />

@@ -19,6 +19,7 @@ from app.routers import (
     dashboard,
     reportes,
     public,
+    importaciones,
 )
 
 
@@ -56,6 +57,7 @@ app.include_router(notificaciones.router, prefix="/api")
 app.include_router(dashboard.router, prefix="/api")
 app.include_router(reportes.router, prefix="/api")
 app.include_router(public.router, prefix="/api")
+app.include_router(importaciones.router, prefix="/api")
 
 
 @app.get("/api/health")

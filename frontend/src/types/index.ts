@@ -83,6 +83,43 @@ export interface NotificationLog {
   detalle_error: string | null
 }
 
+export interface ImportPeriodoPreview {
+  periodo_inicio: string
+  periodo_fin: string
+  mes_columna: string | null
+  monto: string
+  prorrateado: boolean
+  marcado_pagado: boolean
+}
+
+export interface ImportAlumnoRow {
+  fila: number
+  numero_identificacion: string
+  nombres: string
+  apellidos: string
+  fecha_nacimiento: string
+  fecha_ingreso: string
+  acudiente_nombre: string
+  acudiente_telefono: string
+  meses: Record<string, string>
+}
+
+export interface ImportAlumnoPreview extends ImportAlumnoRow {
+  categoria_nombre: string | null
+  periodos: ImportPeriodoPreview[]
+  errores: string[]
+  advertencias: string[]
+}
+
+export interface ImportConfirmResultItem {
+  fila: number
+  ok: boolean
+  alumno_id: number | null
+  mensualidades_generadas: number
+  pagos_generados: number
+  error: string | null
+}
+
 export interface ListResponse<T> {
   items: T[]
   total: number
