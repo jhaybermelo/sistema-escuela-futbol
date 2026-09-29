@@ -157,7 +157,7 @@ export default function MensualidadesPage() {
         <p className="text-slate-500">Cargando...</p>
       ) : (
         <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white">
-          <table className="w-full text-left text-sm">
+          <table className="responsive-table w-full text-left text-sm">
             <thead className="bg-slate-50 text-slate-600">
               <tr>
                 <th className="px-4 py-3">Alumno</th>
@@ -171,22 +171,22 @@ export default function MensualidadesPage() {
             <tbody>
               {data?.items.map((m) => (
                 <tr key={m.id} className="border-t border-slate-100">
-                  <td className="px-4 py-3 text-slate-800">{m.alumno_nombre}</td>
-                  <td className="px-4 py-3 text-slate-600">
+                  <td className="px-4 py-3 text-slate-800" data-label="Alumno">{m.alumno_nombre}</td>
+                  <td className="px-4 py-3 text-slate-600" data-label="Periodo">
                     {m.periodo_inicio} - {m.periodo_fin}
                   </td>
-                  <td className="px-4 py-3 text-slate-800">
+                  <td className="px-4 py-3 text-slate-800" data-label="Monto">
                     {formatMoney(m.monto)}
                     {m.monto_prorrateado && <span className="ml-1 text-xs text-amber-600">(prorrateado)</span>}
                   </td>
-                  <td className="px-4 py-3 text-slate-600">{m.fecha_vencimiento}</td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3 text-slate-600" data-label="Vencimiento">{m.fecha_vencimiento}</td>
+                  <td className="px-4 py-3" data-label="Estado">
                     <span className={`rounded-full px-2 py-1 text-xs font-medium ${ESTADO_COLOR[m.estado]}`}>
                       {ESTADO_LABEL[m.estado]}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-right">
-                    <div className="flex justify-end gap-2">
+                  <td className="px-4 py-3 text-right" data-label="Acciones">
+                    <div className="flex flex-wrap justify-end gap-2">
                       {Number(m.total_pagado) > 0 && (
                         <button
                           onClick={() => setPagosDe(m.id)}

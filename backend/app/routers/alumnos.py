@@ -192,6 +192,16 @@ async def update_alumno(
         if not categoria:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Categoría no encontrada")
         update_data["categoria_override"] = True
+    elif "fecha_nacimiento" in update_data and not alumno.categoria_override:
+        # Categoría auto-asignada: si cambia la fecha de nacimiento, se recalcula en
+        # el momento (sin esperar al job diario o al botón manual de recálculo).
+        try:
+            nueva_categoria = await CategoriaAssignmentService(db).resolve_categoria(
+                update_data["fecha_nacimiento"]
+            )
+        except ValueError as e:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        update_data["categoria_id"] = nueva_categoria.id
 
     alumno = await repo.update(alumno, update_data)
     await db.commit()

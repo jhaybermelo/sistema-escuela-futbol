@@ -122,7 +122,7 @@ export default function CategoriasPage() {
         <p className="text-slate-500">Cargando...</p>
       ) : (
         <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white">
-          <table className="w-full text-left text-sm">
+          <table className="responsive-table w-full text-left text-sm">
             <thead className="bg-slate-50 text-slate-600">
               <tr>
                 <th className="px-4 py-3">Nombre</th>
@@ -134,17 +134,17 @@ export default function CategoriasPage() {
             <tbody>
               {data?.items.map((categoria) => (
                 <tr key={categoria.id} className="border-t border-slate-100">
-                  <td className="px-4 py-3 font-medium text-slate-800">{categoria.nombre}</td>
-                  <td className="px-4 py-3 text-slate-600">
+                  <td className="px-4 py-3 font-medium text-slate-800" data-label="Nombre">{categoria.nombre}</td>
+                  <td className="px-4 py-3 text-slate-600" data-label="Años de nacimiento">
                     {categoria.anio_nacimiento_min === categoria.anio_nacimiento_max
                       ? categoria.anio_nacimiento_min
                       : `${categoria.anio_nacimiento_min} - ${categoria.anio_nacimiento_max}`}
                   </td>
-                  <td className="px-4 py-3 text-slate-600">
+                  <td className="px-4 py-3 text-slate-600" data-label="Días de entrenamiento">
                     {categoria.dias_entrenamiento.map((d) => DIAS[d]).join(', ') || '—'}
                   </td>
                   {isAdmin && (
-                    <td className="px-4 py-3 text-right">
+                    <td className="px-4 py-3 text-right" data-label="Acciones">
                       <button onClick={() => openEdit(categoria)} className="text-slate-400 hover:text-green-700">
                         <Pencil size={16} />
                       </button>

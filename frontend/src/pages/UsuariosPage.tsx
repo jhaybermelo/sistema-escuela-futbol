@@ -40,7 +40,7 @@ export default function UsuariosPage() {
         <p className="text-slate-500">Cargando...</p>
       ) : (
         <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white">
-          <table className="w-full text-left text-sm">
+          <table className="responsive-table w-full text-left text-sm">
             <thead className="bg-slate-50 text-slate-600">
               <tr>
                 <th className="px-4 py-3">Nombre</th>
@@ -54,10 +54,10 @@ export default function UsuariosPage() {
             <tbody>
               {data?.items.map((u) => (
                 <tr key={u.id} className="border-t border-slate-100">
-                  <td className="px-4 py-3 text-slate-800">{u.nombre}</td>
-                  <td className="px-4 py-3 text-slate-600">{u.email}</td>
-                  <td className="px-4 py-3 text-slate-600 capitalize">{u.rol}</td>
-                  <td className="px-4 py-3 text-slate-600">
+                  <td className="px-4 py-3 text-slate-800" data-label="Nombre">{u.nombre}</td>
+                  <td className="px-4 py-3 text-slate-600" data-label="Email">{u.email}</td>
+                  <td className="px-4 py-3 text-slate-600 capitalize" data-label="Rol">{u.rol}</td>
+                  <td className="px-4 py-3 text-slate-600" data-label="Categorías">
                     {u.rol === 'entrenador' ? (
                       <button
                         onClick={() => setCategoriasFor(u)}
@@ -69,7 +69,7 @@ export default function UsuariosPage() {
                       '—'
                     )}
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3" data-label="Estado">
                     <span
                       className={`rounded-full px-2 py-1 text-xs font-medium ${
                         u.activo ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-500'
@@ -78,7 +78,7 @@ export default function UsuariosPage() {
                       {u.activo ? 'Activo' : 'Inactivo'}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="px-4 py-3 text-right" data-label="Acciones">
                     <button
                       onClick={() => toggleActivoMutation.mutate({ id: u.id, activo: !u.activo })}
                       className="text-slate-400 hover:text-green-700"

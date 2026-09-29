@@ -87,7 +87,7 @@ export default function ReportesPage() {
           </div>
 
           <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white">
-            <table className="w-full text-left text-sm">
+            <table className="responsive-table w-full text-left text-sm">
               <thead className="bg-slate-50 text-slate-600">
                 <tr>
                   <th className="px-4 py-3">Fecha</th>
@@ -100,11 +100,11 @@ export default function ReportesPage() {
               <tbody>
                 {data?.pagos.map((p) => (
                   <tr key={p.id} className="border-t border-slate-100">
-                    <td className="px-4 py-3 text-slate-600">{p.fecha_pago}</td>
-                    <td className="px-4 py-3 text-slate-800">{p.alumno_nombre || '—'}</td>
-                    <td className="px-4 py-3 text-slate-600">{p.periodo_texto || '—'}</td>
-                    <td className="px-4 py-3 text-slate-600">{METODO_LABEL[p.metodo_pago] ?? p.metodo_pago}</td>
-                    <td className="px-4 py-3 text-slate-800">{formatMoney(p.monto)}</td>
+                    <td className="px-4 py-3 text-slate-600" data-label="Fecha">{p.fecha_pago}</td>
+                    <td className="px-4 py-3 text-slate-800" data-label="Alumno">{p.alumno_nombre || '—'}</td>
+                    <td className="px-4 py-3 text-slate-600" data-label="Periodo">{p.periodo_texto || '—'}</td>
+                    <td className="px-4 py-3 text-slate-600" data-label="Método">{METODO_LABEL[p.metodo_pago] ?? p.metodo_pago}</td>
+                    <td className="px-4 py-3 text-slate-800" data-label="Monto">{formatMoney(p.monto)}</td>
                   </tr>
                 ))}
                 {data?.pagos.length === 0 && (

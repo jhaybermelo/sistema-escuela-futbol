@@ -6,11 +6,24 @@ from app.core.logging_config import get_logger
 from app.database import AsyncSessionLocal
 from app.repositories.school_config_repository import SchoolConfigRepository
 from app.services.billing_service import BillingService
+from app.services.categoria_assignment_service import CategoriaAssignmentService
 from app.services.reminder_service import ReminderService
 
 logger = get_logger("scheduler", settings.LOG_DIR)
 
 scheduler = AsyncIOScheduler(timezone=settings.TIMEZONE)
+
+
+async def run_categoria_recompute_job():
+    """Corre todos los días, antes de la facturación: recalcula la categoría de todo
+    alumno sin asignación manual (categoria_override=False) según su fecha de
+    nacimiento actual. Cubre los casos en que se edita la fecha de nacimiento de un
+    alumno sin pasar también por el recálculo manual desde la UI."""
+    async with AsyncSessionLocal() as db:
+        cambios = await CategoriaAssignmentService(db).recompute_all()
+        await db.commit()
+        if cambios:
+            logger.info(f"[JOB_RECOMPUTE_CATEGORIAS] cambios={len(cambios)}")
 
 
 async def run_billing_job():
@@ -43,6 +56,12 @@ async def run_reminder_job():
 
 
 def start_scheduler():
+    scheduler.add_job(
+        run_categoria_recompute_job,
+        CronTrigger(hour=0, minute=30),
+        id="categoria_recompute_daily",
+        replace_existing=True,
+    )
     scheduler.add_job(
         run_billing_job,
         CronTrigger(hour=1, minute=0),

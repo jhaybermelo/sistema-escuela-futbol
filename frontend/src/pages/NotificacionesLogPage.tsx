@@ -50,7 +50,7 @@ export default function NotificacionesLogPage() {
         <p className="text-slate-500">Cargando...</p>
       ) : (
         <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white">
-          <table className="w-full text-left text-sm">
+          <table className="responsive-table w-full text-left text-sm">
             <thead className="bg-slate-50 text-slate-600">
               <tr>
                 <th className="px-4 py-3">Fecha</th>
@@ -63,11 +63,11 @@ export default function NotificacionesLogPage() {
             <tbody>
               {data?.items.map((n) => (
                 <tr key={n.id} className="border-t border-slate-100">
-                  <td className="px-4 py-3 text-slate-600">{new Date(n.enviado_en).toLocaleString('es-CO')}</td>
-                  <td className="px-4 py-3 text-slate-800">{n.alumno_nombre}</td>
-                  <td className="px-4 py-3 text-slate-600">{TIPO_LABEL[n.tipo] ?? n.tipo}</td>
-                  <td className="px-4 py-3 text-slate-600">{CANAL_LABEL[n.canal] ?? n.canal}</td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3 text-slate-600" data-label="Fecha">{new Date(n.enviado_en).toLocaleString('es-CO')}</td>
+                  <td className="px-4 py-3 text-slate-800" data-label="Alumno">{n.alumno_nombre}</td>
+                  <td className="px-4 py-3 text-slate-600" data-label="Tipo">{TIPO_LABEL[n.tipo] ?? n.tipo}</td>
+                  <td className="px-4 py-3 text-slate-600" data-label="Canal">{CANAL_LABEL[n.canal] ?? n.canal}</td>
+                  <td className="px-4 py-3" data-label="Resultado">
                     {n.exitoso ? (
                       <span className="flex items-center gap-1 text-green-700">
                         <Check size={14} /> Enviado

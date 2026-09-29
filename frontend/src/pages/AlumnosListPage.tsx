@@ -128,7 +128,7 @@ export default function AlumnosListPage() {
         <p className="text-slate-500">Cargando...</p>
       ) : (
         <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white">
-          <table className="w-full text-left text-sm">
+          <table className="responsive-table w-full text-left text-sm">
             <thead className="bg-slate-50 text-slate-600">
               <tr>
                 <th className="px-4 py-3">Identificación</th>
@@ -144,22 +144,22 @@ export default function AlumnosListPage() {
                 const conteo = cartera?.[alumno.id]
                 return (
                   <tr key={alumno.id} className="border-t border-slate-100 hover:bg-slate-50">
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3" data-label="Identificación">
                       <Link to={`/alumnos/${alumno.id}`} className="text-green-700 hover:underline">
                         {alumno.numero_identificacion}
                       </Link>
                     </td>
-                    <td className="px-4 py-3 text-slate-800">
+                    <td className="px-4 py-3 text-slate-800" data-label="Nombre">
                       {alumno.nombres} {alumno.apellidos}
                     </td>
-                    <td className="px-4 py-3 text-slate-600">{alumno.categoria_nombre}</td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3 text-slate-600" data-label="Categoría">{alumno.categoria_nombre}</td>
+                    <td className="px-4 py-3" data-label="Estado">
                       <span className={`rounded-full px-2 py-1 text-xs font-medium ${ESTADO_COLOR[alumno.estado]}`}>
                         {ESTADO_LABEL[alumno.estado]}
                       </span>
                     </td>
                     {isAdmin && (
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3" data-label="Cartera">
                         <Link to={`/mensualidades?alumno_id=${alumno.id}`}>
                           {!conteo || (conteo.pendientes === 0 && conteo.vencidas === 0) ? (
                             <span className="rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800">
@@ -182,7 +182,7 @@ export default function AlumnosListPage() {
                         </Link>
                       </td>
                     )}
-                    <td className="px-4 py-3 text-right">
+                    <td className="px-4 py-3 text-right" data-label="Acciones">
                       <Link
                         to={`/alumnos/${alumno.id}/editar`}
                         className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-green-700"
