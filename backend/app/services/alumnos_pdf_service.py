@@ -52,25 +52,42 @@ _ESTILO_CELDA_HEADER = ParagraphStyle(
 )
 
 
+# El logo no cambia en tiempo de ejecución, así que ambas variantes se calculan una
+# sola vez por proceso y se reutiliza el mismo ImageReader en todas las páginas y en
+# todas las generaciones de PDF — pasar un ImageReader *nuevo* en cada página hacía
+# que reportlab incrustara la imagen una vez por página (PDF pesado y lento de
+# generar en documentos de varias páginas).
+_logo_nitido_cache: ImageReader | None = None
+_logo_marca_agua_cache: ImageReader | None = None
+
+
 def _logo_nitido() -> ImageReader | None:
-    if not os.path.exists(LOGO_PATH):
-        return None
-    return ImageReader(LOGO_PATH)
+    global _logo_nitido_cache
+    if _logo_nitido_cache is None and os.path.exists(LOGO_PATH):
+        _logo_nitido_cache = ImageReader(LOGO_PATH)
+    return _logo_nitido_cache
 
 
 def _logo_marca_agua() -> ImageReader | None:
     """Copia del logo con el canal alfa reducido al 6%, para usarla como marca de
     agua detrás de la tabla sin afectar la lectura — se genera en memoria a partir
-    del archivo original, sin modificarlo."""
+    del archivo original, sin modificarlo. Se reduce también la resolución (no hace
+    falta el tamaño completo del logo para un watermark apenas visible), que es lo
+    que más pesaba del PDF."""
+    global _logo_marca_agua_cache
+    if _logo_marca_agua_cache is not None:
+        return _logo_marca_agua_cache
     if not os.path.exists(LOGO_PATH):
         return None
     imagen = PILImage.open(LOGO_PATH).convert("RGBA")
+    imagen.thumbnail((400, 400))
     alfa = imagen.split()[3].point(lambda a: int(a * 0.06))
     imagen.putalpha(alfa)
     buffer = BytesIO()
-    imagen.save(buffer, format="PNG")
+    imagen.save(buffer, format="PNG", optimize=True)
     buffer.seek(0)
-    return ImageReader(buffer)
+    _logo_marca_agua_cache = ImageReader(buffer)
+    return _logo_marca_agua_cache
 
 
 class _CanvasConPaginacion(Canvas):
