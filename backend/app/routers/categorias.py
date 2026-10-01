@@ -7,6 +7,7 @@ from app.core.dependencies import get_current_user, require_admin
 from app.core.logging_config import get_logger
 from app.config import settings
 from app.database import get_db
+from app.models.categoria import Categoria
 from app.repositories.categoria_repository import CategoriaRepository
 from app.schemas.categoria import (
     CategoriaCreate,
@@ -19,12 +20,29 @@ router = APIRouter(prefix="/categorias", tags=["categorias"])
 logger = get_logger("categorias", settings.LOG_DIR)
 
 
+def _to_response(categoria: Categoria, total_alumnos: int = 0) -> CategoriaResponse:
+    return CategoriaResponse(
+        id=categoria.id,
+        nombre=categoria.nombre,
+        anio_nacimiento_min=categoria.anio_nacimiento_min,
+        anio_nacimiento_max=categoria.anio_nacimiento_max,
+        dias_entrenamiento=categoria.dias_entrenamiento,
+        activo=categoria.activo,
+        total_alumnos=total_alumnos,
+    )
+
+
 @router.get("", response_model=CategoriaListResponse, dependencies=[Depends(get_current_user)])
 async def list_categorias(page: int = 1, size: int = 50, db: AsyncSession = Depends(get_db)):
     repo = CategoriaRepository(db)
     items, total = await repo.list(page, size)
+    conteos = await repo.conteo_alumnos_activos()
     return CategoriaListResponse(
-        items=items, total=total, page=page, size=size, pages=max(1, math.ceil(total / size))
+        items=[_to_response(c, conteos.get(c.id, 0)) for c in items],
+        total=total,
+        page=page,
+        size=size,
+        pages=max(1, math.ceil(total / size)),
     )
 
 
@@ -43,7 +61,7 @@ async def create_categoria(data: CategoriaCreate, db: AsyncSession = Depends(get
     await db.commit()
     await db.refresh(categoria)
     logger.info(f"[CATEGORIA_CREADA] nombre={categoria.nombre}")
-    return categoria
+    return _to_response(categoria)
 
 
 @router.get("/{categoria_id}", response_model=CategoriaResponse, dependencies=[Depends(get_current_user)])
@@ -52,7 +70,8 @@ async def get_categoria(categoria_id: int, db: AsyncSession = Depends(get_db)):
     categoria = await repo.get_by_id(categoria_id)
     if not categoria:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Categoría no encontrada")
-    return categoria
+    conteos = await repo.conteo_alumnos_activos()
+    return _to_response(categoria, conteos.get(categoria.id, 0))
 
 
 @router.put("/{categoria_id}", response_model=CategoriaResponse, dependencies=[Depends(require_admin)])
@@ -65,8 +84,9 @@ async def update_categoria(categoria_id: int, data: CategoriaUpdate, db: AsyncSe
     categoria = await repo.update(categoria, data.model_dump(exclude_unset=True))
     await db.commit()
     await db.refresh(categoria)
+    conteos = await repo.conteo_alumnos_activos()
     logger.info(f"[CATEGORIA_ACTUALIZADA] id={categoria_id}")
-    return categoria
+    return _to_response(categoria, conteos.get(categoria.id, 0))
 
 
 @router.delete("/{categoria_id}", dependencies=[Depends(require_admin)])

@@ -15,6 +15,7 @@ export interface Categoria {
   anio_nacimiento_max: number
   dias_entrenamiento: number[]
   activo: boolean
+  total_alumnos: number
 }
 
 export type EstadoAlumno = 'activo' | 'inactivo' | 'retirado'
@@ -42,6 +43,7 @@ export interface SchoolConfig {
   dia_corte: number
   dias_recordatorio_previo: number
   fecha_inicio: string | null
+  meses_gracia_pago: number
 }
 
 export type EstadoMensualidad = 'pendiente' | 'parcial' | 'pagado' | 'vencido'
@@ -68,8 +70,8 @@ export interface ResumenAlumno {
   meses_desde_inicio_escuela: number | null
 }
 
-export type TipoNotificacion = 'previo_vencimiento' | 'vencido'
-export type CanalNotificacion = 'email' | 'whatsapp'
+export type TipoNotificacion = 'previo_vencimiento' | 'vencido' | 'bloqueo'
+export type CanalNotificacion = 'email' | 'whatsapp' | 'whatsapp_profesor'
 
 export interface NotificationLog {
   id: number

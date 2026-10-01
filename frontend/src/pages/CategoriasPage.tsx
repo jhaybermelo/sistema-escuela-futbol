@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
-import { Plus, Pencil } from 'lucide-react'
+import { Plus, Pencil, FileDown } from 'lucide-react'
 import * as categoriasApi from '../api/categorias'
+import * as alumnosApi from '../api/alumnos'
 import type { Categoria } from '../types'
 import { useAuth } from '../context/AuthContext'
 import { Button } from '../components/ui/Button'
@@ -32,6 +34,7 @@ export default function CategoriasPage() {
   const [editing, setEditing] = useState<Categoria | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState<FormState>(emptyForm)
+  const [generandoPdfId, setGenerandoPdfId] = useState<number | null>(null)
 
   const { data, isLoading } = useQuery({
     queryKey: ['categorias'],
@@ -107,6 +110,25 @@ export default function CategoriasPage() {
 
   const isAdmin = user?.rol === 'admin'
 
+  async function handleGenerarListadoPdf(categoria: Categoria) {
+    setGenerandoPdfId(categoria.id)
+    try {
+      const blob = await alumnosApi.getListadoPdfBlob({ categoria_id: categoria.id })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `listado-${categoria.nombre.trim().replace(/\s+/g, '-').toLowerCase()}.pdf`
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      URL.revokeObjectURL(url)
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Error al generar el listado PDF'))
+    } finally {
+      setGenerandoPdfId(null)
+    }
+  }
+
   return (
     <div>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
@@ -128,6 +150,8 @@ export default function CategoriasPage() {
                 <th className="px-4 py-3">Nombre</th>
                 <th className="px-4 py-3">Años de nacimiento</th>
                 <th className="px-4 py-3">Días de entrenamiento</th>
+                <th className="px-4 py-3">Alumnos</th>
+                <th className="px-4 py-3" />
                 {isAdmin && <th className="px-4 py-3" />}
               </tr>
             </thead>
@@ -143,6 +167,25 @@ export default function CategoriasPage() {
                   <td className="px-4 py-3 text-slate-600" data-label="Días de entrenamiento">
                     {categoria.dias_entrenamiento.map((d) => DIAS[d]).join(', ') || '—'}
                   </td>
+                  <td className="px-4 py-3" data-label="Alumnos">
+                    <Link
+                      to={`/alumnos?categoria_id=${categoria.id}`}
+                      className="rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800 hover:underline"
+                    >
+                      {categoria.total_alumnos}
+                    </Link>
+                  </td>
+                  <td className="px-4 py-3 text-right" data-label="Listado">
+                    <button
+                      onClick={() => handleGenerarListadoPdf(categoria)}
+                      disabled={generandoPdfId === categoria.id}
+                      className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-green-700 disabled:opacity-50"
+                      title="Generar listado PDF"
+                    >
+                      <FileDown size={14} />
+                      {generandoPdfId === categoria.id ? 'Generando...' : 'Generar listado PDF'}
+                    </button>
+                  </td>
                   {isAdmin && (
                     <td className="px-4 py-3 text-right" data-label="Acciones">
                       <button onClick={() => openEdit(categoria)} className="text-slate-400 hover:text-green-700">
@@ -154,7 +197,7 @@ export default function CategoriasPage() {
               ))}
               {data?.items.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="px-4 py-6 text-center text-slate-400">
+                  <td colSpan={6} className="px-4 py-6 text-center text-slate-400">
                     No hay categorías registradas.
                   </td>
                 </tr>

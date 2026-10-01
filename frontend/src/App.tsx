@@ -19,6 +19,7 @@ const MensualidadesPage = lazy(() => import('./pages/MensualidadesPage'))
 const NotificacionesLogPage = lazy(() => import('./pages/NotificacionesLogPage'))
 const ReportesPage = lazy(() => import('./pages/ReportesPage'))
 const UsuariosPage = lazy(() => import('./pages/UsuariosPage'))
+const ProfesoresPage = lazy(() => import('./pages/ProfesoresPage'))
 const ReciboPage = lazy(() => import('./pages/ReciboPage'))
 const ReciboPublicoPage = lazy(() => import('./pages/ReciboPublicoPage'))
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
@@ -96,6 +97,14 @@ function App() {
                   element={
                     <ProtectedRoute requireAdmin>
                       <UsuariosPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/profesores"
+                  element={
+                    <ProtectedRoute requireAdmin>
+                      <ProfesoresPage />
                     </ProtectedRoute>
                   }
                 />

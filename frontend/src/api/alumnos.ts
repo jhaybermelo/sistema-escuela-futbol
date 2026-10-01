@@ -70,3 +70,11 @@ export async function getCarnetBlob(id: number, formato: 'png' | 'pdf') {
   })
   return data
 }
+
+export async function getListadoPdfBlob(params: { search?: string; categoria_id?: number }) {
+  const { data } = await api.get<Blob>('/alumnos/exportar-pdf', {
+    params,
+    responseType: 'blob',
+  })
+  return data
+}

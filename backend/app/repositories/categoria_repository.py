@@ -1,12 +1,24 @@
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.models.alumno import Alumno
 from app.models.categoria import Categoria
 
 
 class CategoriaRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
+
+    async def conteo_alumnos_activos(self) -> dict[int, int]:
+        """Cantidad de alumnos activos por categoria_id, en una sola consulta (evita
+        N+1 al listar categorías)."""
+        stmt = (
+            select(Alumno.categoria_id, func.count())
+            .where(Alumno.estado == "activo")
+            .group_by(Alumno.categoria_id)
+        )
+        result = await self.db.execute(stmt)
+        return dict(result.all())
 
     async def get_by_id(self, categoria_id: int) -> Categoria | None:
         result = await self.db.execute(select(Categoria).where(Categoria.id == categoria_id))

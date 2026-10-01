@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import toast from 'react-hot-toast'
-import { Plus, Search, RefreshCw, Pencil, FileUp } from 'lucide-react'
+import { Plus, Search, RefreshCw, Pencil, FileUp, FileDown } from 'lucide-react'
 import * as alumnosApi from '../api/alumnos'
 import * as categoriasApi from '../api/categorias'
 import * as mensualidadesApi from '../api/mensualidades'
@@ -27,9 +27,11 @@ const ESTADO_COLOR: Record<string, string> = {
 export default function AlumnosListPage() {
   const { user } = useAuth()
   const queryClient = useQueryClient()
+  const [searchParams] = useSearchParams()
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
-  const [categoriaId, setCategoriaId] = useState<string>('')
+  const [categoriaId, setCategoriaId] = useState<string>(searchParams.get('categoria_id') ?? '')
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false)
 
   const { data, isLoading } = useQuery({
     queryKey: ['alumnos', page, search, categoriaId],
@@ -64,11 +66,43 @@ export default function AlumnosListPage() {
     onError: (err) => toast.error(getErrorMessage(err, 'Error al recalcular categorías')),
   })
 
+  async function handleDescargarPdf() {
+    setIsDownloadingPdf(true)
+    try {
+      const blob = await alumnosApi.getListadoPdfBlob({
+        search: search || undefined,
+        categoria_id: categoriaId ? Number(categoriaId) : undefined,
+      })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = 'listado-alumnos.pdf'
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      URL.revokeObjectURL(url)
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Error al generar el PDF'))
+    } finally {
+      setIsDownloadingPdf(false)
+    }
+  }
+
   return (
     <div>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold text-slate-800">Alumnos</h1>
+        <div className="flex items-baseline gap-2">
+          <h1 className="text-2xl font-semibold text-slate-800">Alumnos</h1>
+          {data && (
+            <span className="text-sm text-slate-500">
+              ({data.total} {data.total === 1 ? 'alumno' : 'alumnos'})
+            </span>
+          )}
+        </div>
         <div className="flex flex-wrap gap-2">
+          <Button variant="secondary" className="gap-2" onClick={handleDescargarPdf} disabled={isDownloadingPdf}>
+            <FileDown size={16} /> {isDownloadingPdf ? 'Generando...' : 'Generar PDF'}
+          </Button>
           {isAdmin && (
             <Button
               variant="secondary"

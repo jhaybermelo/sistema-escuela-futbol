@@ -7,6 +7,7 @@ export interface SchoolConfigInput {
   dia_corte?: number
   dias_recordatorio_previo?: number
   fecha_inicio?: string | null
+  meses_gracia_pago?: number
 }
 
 export async function getConfig() {

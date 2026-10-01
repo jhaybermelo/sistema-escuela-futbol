@@ -10,6 +10,7 @@ from app.core.scheduler import start_scheduler, stop_scheduler
 from app.routers import (
     auth,
     usuarios,
+    profesores,
     categorias,
     alumnos,
     config as config_router,
@@ -48,6 +49,7 @@ app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_DIR), name="uploads"
 
 app.include_router(auth.router, prefix="/api")
 app.include_router(usuarios.router, prefix="/api")
+app.include_router(profesores.router, prefix="/api")
 app.include_router(categorias.router, prefix="/api")
 app.include_router(alumnos.router, prefix="/api")
 app.include_router(config_router.router, prefix="/api")

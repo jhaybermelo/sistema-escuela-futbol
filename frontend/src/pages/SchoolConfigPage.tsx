@@ -18,6 +18,7 @@ export default function SchoolConfigPage() {
     dia_corte: '',
     dias_recordatorio_previo: '',
     fecha_inicio: '',
+    meses_gracia_pago: '',
   })
 
   useEffect(() => {
@@ -29,6 +30,7 @@ export default function SchoolConfigPage() {
         dia_corte: String(data.dia_corte),
         dias_recordatorio_previo: String(data.dias_recordatorio_previo),
         fecha_inicio: data.fecha_inicio ?? '',
+        meses_gracia_pago: String(data.meses_gracia_pago),
       })
     }
   }, [data])
@@ -41,6 +43,7 @@ export default function SchoolConfigPage() {
         dia_corte: Number(form.dia_corte),
         dias_recordatorio_previo: Number(form.dias_recordatorio_previo),
         fecha_inicio: form.fecha_inicio || null,
+        meses_gracia_pago: Number(form.meses_gracia_pago),
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['school-config'] })
@@ -109,6 +112,20 @@ export default function SchoolConfigPage() {
           <p className="text-xs text-slate-400">
             El histórico de mensualidades de cada alumno nunca empieza antes de esta fecha, aunque su
             fecha de ingreso sea anterior. Déjala vacía si no quieres limitar el histórico.
+          </p>
+          <Input
+            label="Meses de gracia antes de bloquear por mora (0-6)"
+            type="number"
+            min="0"
+            max="6"
+            value={form.meses_gracia_pago}
+            onChange={(e) => setForm({ ...form, meses_gracia_pago: e.target.value })}
+          />
+          <p className="text-xs text-slate-400">
+            Mensualidades vencidas consecutivas que se toleran antes de avisar que el alumno no debe ser
+            recibido en el entrenamiento. 0 = se avisa apenas se vence la mensualidad del mes en curso; 1 =
+            se permite quedar un mes sin pagar antes de avisar; y así sucesivamente. El aviso se envía una
+            sola vez al acudiente y a los profesores de la categoría del alumno.
           </p>
           <div className="flex justify-end pt-2">
             <Button type="submit" disabled={mutation.isPending}>

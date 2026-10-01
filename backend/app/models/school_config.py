@@ -21,3 +21,6 @@ class SchoolConfig(Base):
     # backfillear un alumno, el histórico nunca arranca antes de esta fecha aunque
     # su fecha_ingreso sea anterior.
     fecha_inicio: Mapped[date | None] = mapped_column(Date, nullable=True)
+    # Mensualidades vencidas consecutivas toleradas antes de bloquear al alumno
+    # (avisar a acudiente y profesor). 0 = se avisa apenas se vence la del mes actual.
+    meses_gracia_pago: Mapped[int] = mapped_column(Integer, default=0)

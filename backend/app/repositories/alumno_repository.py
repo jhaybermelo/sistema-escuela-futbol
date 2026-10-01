@@ -74,6 +74,39 @@ class AlumnoRepository:
         items = (await self.db.execute(list_stmt)).scalars().all()
         return list(items), total
 
+    async def list_sin_paginar(
+        self,
+        search: str | None = None,
+        categoria_id: int | None = None,
+        estado: str | None = None,
+        categoria_ids_scope: list[int] | None = None,
+    ) -> list[Alumno]:
+        """Igual que `list`, pero sin paginar — para exportar un listado completo
+        (ej. PDF) con los mismos filtros que la tabla de Alumnos."""
+        conditions = []
+        if search:
+            like = f"%{search}%"
+            conditions.append(
+                or_(
+                    Alumno.nombres.ilike(like),
+                    Alumno.apellidos.ilike(like),
+                    Alumno.numero_identificacion.ilike(like),
+                )
+            )
+        if categoria_id:
+            conditions.append(Alumno.categoria_id == categoria_id)
+        if estado:
+            conditions.append(Alumno.estado == estado)
+        if categoria_ids_scope is not None:
+            conditions.append(Alumno.categoria_id.in_(categoria_ids_scope))
+
+        stmt = select(Alumno).options(selectinload(Alumno.categoria))
+        for cond in conditions:
+            stmt = stmt.where(cond)
+        stmt = stmt.order_by(Alumno.apellidos, Alumno.nombres)
+        items = (await self.db.execute(stmt)).scalars().all()
+        return list(items)
+
     async def list_activos(self) -> list[Alumno]:
         stmt = (
             select(Alumno)

@@ -15,6 +15,13 @@ logger = get_logger("notificaciones", settings.LOG_DIR)
 
 
 def _mensaje(alumno: Alumno, mensualidad: Mensualidad, tipo: str) -> str:
+    if tipo == "bloqueo":
+        return (
+            f"Hola {alumno.acudiente_nombre}, {alumno.nombres} {alumno.apellidos} tiene mensualidades "
+            f"pendientes desde hace varios meses y se cumplió el plazo límite de pago. Por este motivo, "
+            f"no se podrá recibir al niño en los entrenamientos hasta que se ponga al día con las "
+            f"mensualidades pendientes."
+        )
     if tipo == "vencido":
         return (
             f"Hola {alumno.acudiente_nombre}, la mensualidad de {alumno.nombres} {alumno.apellidos} "
@@ -24,6 +31,14 @@ def _mensaje(alumno: Alumno, mensualidad: Mensualidad, tipo: str) -> str:
     return (
         f"Hola {alumno.acudiente_nombre}, te recordamos que la mensualidad de "
         f"{alumno.nombres} {alumno.apellidos} vence el {mensualidad.fecha_vencimiento}."
+    )
+
+
+def _mensaje_bloqueo_profesor(alumno: Alumno) -> str:
+    categoria_nombre = alumno.categoria.nombre if alumno.categoria else ""
+    return (
+        f"Aviso: el alumno {alumno.nombres} {alumno.apellidos} (categoría {categoria_nombre}) no ha "
+        f"pagado la mensualidad y no debe ser recibido en el entrenamiento hasta ponerse al día."
     )
 
 
@@ -100,6 +115,54 @@ class ReminderService:
 
         return enviados, fallidos
 
+    async def _procesar_bloqueo(self, mensualidad: Mensualidad) -> tuple[int, int]:
+        """Avisa al acudiente y a los profesores de la categoría del alumno que se
+        cumplió el plazo límite de pago. Se ata a una mensualidad_id concreta (la que
+        cruzó el umbral de meses de gracia) para que, igual que 'vencido', el
+        UniqueConstraint de NotificationLog impida reenviarlo una vez ya se avisó."""
+        alumno = mensualidad.alumno
+        enviados, fallidos = 0, 0
+
+        ea, fa = await self._procesar(mensualidad, "bloqueo")
+        enviados += ea
+        fallidos += fa
+
+        if not await self.log_repo.existe(mensualidad.id, "bloqueo", "whatsapp_profesor"):
+            categoria = alumno.categoria
+            profesores = [p for p in (categoria.profesores if categoria else []) if p.activo and p.telefono]
+            mensaje = _mensaje_bloqueo_profesor(alumno)
+            exitoso, detalle_error = False, None
+            if not profesores:
+                detalle_error = "La categoría no tiene ningún profesor con teléfono registrado"
+            else:
+                for profesor in profesores:
+                    try:
+                        await enviar_whatsapp(profesor.telefono, mensaje)
+                        exitoso = True
+                    except Exception as e:  # noqa: BLE001
+                        detalle_error = str(e)[:500]
+                        logger.warning(
+                            f"[WHATSAPP_PROFESOR_FALLIDO] mensualidad_id={mensualidad.id} "
+                            f"profesor_id={profesor.id} error={e}"
+                        )
+
+            await self.log_repo.create(
+                {
+                    "alumno_id": alumno.id,
+                    "mensualidad_id": mensualidad.id,
+                    "tipo": "bloqueo",
+                    "canal": "whatsapp_profesor",
+                    "exitoso": exitoso,
+                    "detalle_error": None if exitoso else detalle_error,
+                }
+            )
+            if exitoso:
+                enviados += 1
+            else:
+                fallidos += 1
+
+        return enviados, fallidos
+
     async def enviar_recordatorios(self) -> dict:
         config = await SchoolConfigRepository(self.db).get()
         hoy = date.today()
@@ -119,6 +182,17 @@ class ReminderService:
             e, f = await self._procesar(mensualidad, "vencido")
             enviados += e
             fallidos += f
+
+        vencidas_por_alumno: dict[int, list[Mensualidad]] = {}
+        for mensualidad in vencidas:
+            vencidas_por_alumno.setdefault(mensualidad.alumno_id, []).append(mensualidad)
+
+        for lista in vencidas_por_alumno.values():
+            lista.sort(key=lambda m: m.periodo_inicio)
+            if len(lista) > config.meses_gracia_pago:
+                e, f = await self._procesar_bloqueo(lista[config.meses_gracia_pago])
+                enviados += e
+                fallidos += f
 
         await self.db.commit()
         logger.info(f"[RECORDATORIOS] revisadas={revisadas} enviados={enviados} fallidos={fallidos}")

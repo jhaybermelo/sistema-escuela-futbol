@@ -14,6 +14,7 @@ from app.models.usuario import Usuario
 from app.repositories.alumno_repository import AlumnoRepository
 from app.repositories.categoria_repository import CategoriaRepository
 from app.repositories.school_config_repository import SchoolConfigRepository
+from app.services.alumnos_pdf_service import generar_listado_pdf
 from app.services.billing_service import BillingService
 from app.services.carnet_service import generar_carnet_pdf, generar_carnet_png
 from app.schemas.alumno import (
@@ -153,6 +154,39 @@ async def generar_historial(db: AsyncSession = Depends(get_db)):
     resultado = await BillingService(db).generar_historial_todos(config)
     logger.info(f"[GENERAR_HISTORIAL] {resultado}")
     return GenerarHistorialResult(**resultado)
+
+
+@router.get("/exportar-pdf")
+async def exportar_pdf(
+    search: str | None = None,
+    categoria_id: int | None = None,
+    estado: str | None = None,
+    db: AsyncSession = Depends(get_db),
+    usuario: Usuario = Depends(get_current_user),
+):
+    """PDF del listado de alumnos, con los mismos filtros que la tabla. Sin filtro de
+    categoría, agrupa el listado por categoría; con filtro, saca solo esa."""
+    scope = _scope_categorias(usuario)
+    if scope is not None and categoria_id is not None and categoria_id not in scope:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sin acceso a esa categoría")
+
+    alumno_repo = AlumnoRepository(db)
+    alumnos = await alumno_repo.list_sin_paginar(
+        search=search, categoria_id=categoria_id, estado=estado, categoria_ids_scope=scope
+    )
+
+    categoria_filtrada = None
+    if categoria_id is not None:
+        categoria_filtrada = await CategoriaRepository(db).get_by_id(categoria_id)
+    await db.commit()
+
+    contenido = generar_listado_pdf(alumnos, categoria_filtrada)
+    logger.info(f"[ALUMNOS_PDF_EXPORTADO] total={len(alumnos)} categoria_id={categoria_id}")
+    return Response(
+        content=contenido,
+        media_type="application/pdf",
+        headers={"Content-Disposition": "attachment; filename=listado-alumnos.pdf"},
+    )
 
 
 @router.get("/{alumno_id}", response_model=AlumnoResponse)

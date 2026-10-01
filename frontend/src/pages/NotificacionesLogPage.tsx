@@ -10,11 +10,13 @@ import { getErrorMessage } from '../lib/errors'
 const TIPO_LABEL: Record<string, string> = {
   previo_vencimiento: 'Próximo a vencer',
   vencido: 'Vencido',
+  bloqueo: 'Bloqueo por mora',
 }
 
 const CANAL_LABEL: Record<string, string> = {
   email: 'Email',
   whatsapp: 'WhatsApp',
+  whatsapp_profesor: 'WhatsApp (profesor)',
 }
 
 export default function NotificacionesLogPage() {

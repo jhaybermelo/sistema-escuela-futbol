@@ -26,3 +26,6 @@ class Categoria(Base):
     entrenadores = relationship(
         "Usuario", secondary=entrenador_categoria, back_populates="categorias_asignadas"
     )
+    profesores = relationship(
+        "Profesor", secondary="profesor_categoria", back_populates="categorias"
+    )

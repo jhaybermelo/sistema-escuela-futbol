@@ -10,6 +10,7 @@ class SchoolConfigUpdate(BaseModel):
     dia_corte: int | None = Field(default=None, ge=1, le=28)
     dias_recordatorio_previo: int | None = Field(default=None, ge=0, le=30)
     fecha_inicio: date | None = None
+    meses_gracia_pago: int | None = Field(default=None, ge=0, le=6)
 
 
 class SchoolConfigResponse(BaseModel):
@@ -18,5 +19,6 @@ class SchoolConfigResponse(BaseModel):
     dia_corte: int
     dias_recordatorio_previo: int
     fecha_inicio: date | None
+    meses_gracia_pago: int
 
     model_config = {"from_attributes": True}

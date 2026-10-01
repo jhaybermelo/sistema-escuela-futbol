@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
-import { Plus, Shield, Ban, CheckCircle2 } from 'lucide-react'
+import { Plus, Shield, Ban, CheckCircle2, Pencil } from 'lucide-react'
 import * as usuariosApi from '../api/usuarios'
 import * as categoriasApi from '../api/categorias'
 import type { Usuario } from '../api/usuarios'
@@ -13,6 +13,7 @@ import { getErrorMessage } from '../lib/errors'
 export default function UsuariosPage() {
   const queryClient = useQueryClient()
   const [showForm, setShowForm] = useState(false)
+  const [editing, setEditing] = useState<Usuario | null>(null)
   const [categoriasFor, setCategoriasFor] = useState<Usuario | null>(null)
 
   const { data, isLoading } = useQuery({ queryKey: ['usuarios'], queryFn: () => usuariosApi.getUsuarios() })
@@ -79,13 +80,22 @@ export default function UsuariosPage() {
                     </span>
                   </td>
                   <td className="px-4 py-3 text-right" data-label="Acciones">
-                    <button
-                      onClick={() => toggleActivoMutation.mutate({ id: u.id, activo: !u.activo })}
-                      className="text-slate-400 hover:text-green-700"
-                      title={u.activo ? 'Desactivar' : 'Activar'}
-                    >
-                      {u.activo ? <Ban size={16} /> : <CheckCircle2 size={16} />}
-                    </button>
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        onClick={() => setEditing(u)}
+                        className="text-slate-400 hover:text-green-700"
+                        title="Editar"
+                      >
+                        <Pencil size={16} />
+                      </button>
+                      <button
+                        onClick={() => toggleActivoMutation.mutate({ id: u.id, activo: !u.activo })}
+                        className="text-slate-400 hover:text-green-700"
+                        title={u.activo ? 'Desactivar' : 'Activar'}
+                      >
+                        {u.activo ? <Ban size={16} /> : <CheckCircle2 size={16} />}
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -102,6 +112,7 @@ export default function UsuariosPage() {
       )}
 
       {showForm && <UsuarioFormModal onClose={() => setShowForm(false)} />}
+      {editing && <UsuarioFormModal usuario={editing} onClose={() => setEditing(null)} />}
       {categoriasFor && (
         <CategoriasEntrenadorModal usuario={categoriasFor} onClose={() => setCategoriasFor(null)} />
       )}
@@ -109,21 +120,30 @@ export default function UsuariosPage() {
   )
 }
 
-function UsuarioFormModal({ onClose }: { onClose: () => void }) {
+function UsuarioFormModal({ usuario, onClose }: { usuario?: Usuario; onClose: () => void }) {
   const queryClient = useQueryClient()
-  const [email, setEmail] = useState('')
-  const [nombre, setNombre] = useState('')
-  const [rol, setRol] = useState<'admin' | 'entrenador'>('entrenador')
+  const esEdicion = !!usuario
+  const [email, setEmail] = useState(usuario?.email ?? '')
+  const [nombre, setNombre] = useState(usuario?.nombre ?? '')
+  const [rol, setRol] = useState<'admin' | 'entrenador'>(usuario?.rol ?? 'entrenador')
   const [password, setPassword] = useState('')
 
   const mutation = useMutation({
-    mutationFn: () => usuariosApi.createUsuario({ email, nombre, rol, password }),
+    mutationFn: () =>
+      esEdicion
+        ? usuariosApi.updateUsuario(usuario!.id, {
+            email,
+            nombre,
+            rol,
+            ...(password ? { password } : {}),
+          })
+        : usuariosApi.createUsuario({ email, nombre, rol, password }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['usuarios'] })
-      toast.success('Usuario creado')
+      toast.success(esEdicion ? 'Usuario actualizado' : 'Usuario creado')
       onClose()
     },
-    onError: (err) => toast.error(getErrorMessage(err, 'Error al crear el usuario')),
+    onError: (err) => toast.error(getErrorMessage(err, `Error al ${esEdicion ? 'actualizar' : 'crear'} el usuario`)),
   })
 
   function handleSubmit(e: React.FormEvent) {
@@ -132,7 +152,7 @@ function UsuarioFormModal({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <Modal title="Nuevo usuario" onClose={onClose}>
+    <Modal title={esEdicion ? `Editar ${usuario!.nombre}` : 'Nuevo usuario'} onClose={onClose}>
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input label="Nombre" required value={nombre} onChange={(e) => setNombre(e.target.value)} />
         <Input
@@ -154,10 +174,10 @@ function UsuarioFormModal({ onClose }: { onClose: () => void }) {
           </select>
         </div>
         <Input
-          label="Contraseña"
+          label={esEdicion ? 'Nueva contraseña (opcional)' : 'Contraseña'}
           type="password"
           minLength={6}
-          required
+          required={!esEdicion}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
@@ -166,7 +186,7 @@ function UsuarioFormModal({ onClose }: { onClose: () => void }) {
             Cancelar
           </Button>
           <Button type="submit" disabled={mutation.isPending}>
-            Crear
+            {esEdicion ? 'Guardar' : 'Crear'}
           </Button>
         </div>
       </form>

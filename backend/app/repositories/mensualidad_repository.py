@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.models.alumno import Alumno
+from app.models.categoria import Categoria
 from app.models.mensualidad import Mensualidad
 
 
@@ -104,8 +105,13 @@ class MensualidadRepository:
     async def list_vencidas(self) -> list[Mensualidad]:
         stmt = (
             select(Mensualidad)
-            .options(selectinload(Mensualidad.alumno))
+            .options(
+                selectinload(Mensualidad.alumno)
+                .selectinload(Alumno.categoria)
+                .selectinload(Categoria.profesores)
+            )
             .where(Mensualidad.estado == "vencido")
+            .order_by(Mensualidad.periodo_inicio)
         )
         result = await self.db.execute(stmt)
         return list(result.scalars().all())

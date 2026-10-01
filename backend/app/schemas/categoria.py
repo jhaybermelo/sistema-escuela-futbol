@@ -38,6 +38,7 @@ class CategoriaUpdate(BaseModel):
 class CategoriaResponse(CategoriaBase):
     id: int
     activo: bool
+    total_alumnos: int = 0
 
     model_config = {"from_attributes": True}
 
