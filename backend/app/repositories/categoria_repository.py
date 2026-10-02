@@ -1,5 +1,6 @@
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.models.alumno import Alumno
 from app.models.categoria import Categoria
@@ -21,7 +22,12 @@ class CategoriaRepository:
         return dict(result.all())
 
     async def get_by_id(self, categoria_id: int) -> Categoria | None:
-        result = await self.db.execute(select(Categoria).where(Categoria.id == categoria_id))
+        stmt = (
+            select(Categoria)
+            .options(selectinload(Categoria.profesores))
+            .where(Categoria.id == categoria_id)
+        )
+        result = await self.db.execute(stmt)
         return result.scalar_one_or_none()
 
     async def get_by_nombre(self, nombre: str) -> Categoria | None:

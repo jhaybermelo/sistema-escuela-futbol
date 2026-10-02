@@ -53,6 +53,7 @@ export default function ProfesoresPage() {
           <table className="responsive-table w-full text-left text-sm">
             <thead className="bg-slate-50 text-slate-600">
               <tr>
+                <th className="px-4 py-3">Identificación</th>
                 <th className="px-4 py-3">Nombre</th>
                 <th className="px-4 py-3">Teléfono</th>
                 <th className="px-4 py-3">Categorías</th>
@@ -63,6 +64,7 @@ export default function ProfesoresPage() {
             <tbody>
               {data?.items.map((p) => (
                 <tr key={p.id} className="border-t border-slate-100">
+                  <td className="px-4 py-3 text-slate-600" data-label="Identificación">{p.numero_identificacion}</td>
                   <td className="px-4 py-3 text-slate-800" data-label="Nombre">{p.nombre}</td>
                   <td className="px-4 py-3 text-slate-600" data-label="Teléfono">{p.telefono}</td>
                   <td className="px-4 py-3 text-slate-600" data-label="Categorías">
@@ -104,7 +106,7 @@ export default function ProfesoresPage() {
               ))}
               {data?.items.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-4 py-6 text-center text-slate-400">
+                  <td colSpan={6} className="px-4 py-6 text-center text-slate-400">
                     No hay profesores registrados.
                   </td>
                 </tr>
@@ -126,14 +128,19 @@ export default function ProfesoresPage() {
 function ProfesorFormModal({ profesor, onClose }: { profesor?: Profesor; onClose: () => void }) {
   const queryClient = useQueryClient()
   const esEdicion = !!profesor
+  const [numeroIdentificacion, setNumeroIdentificacion] = useState(profesor?.numero_identificacion ?? '')
   const [nombre, setNombre] = useState(profesor?.nombre ?? '')
   const [telefono, setTelefono] = useState(profesor?.telefono ?? '')
 
   const mutation = useMutation({
     mutationFn: () =>
       esEdicion
-        ? profesoresApi.updateProfesor(profesor!.id, { nombre, telefono })
-        : profesoresApi.createProfesor({ nombre, telefono }),
+        ? profesoresApi.updateProfesor(profesor!.id, {
+            numero_identificacion: numeroIdentificacion,
+            nombre,
+            telefono,
+          })
+        : profesoresApi.createProfesor({ numero_identificacion: numeroIdentificacion, nombre, telefono }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['profesores'] })
       toast.success(esEdicion ? 'Profesor actualizado' : 'Profesor creado')
@@ -150,6 +157,12 @@ function ProfesorFormModal({ profesor, onClose }: { profesor?: Profesor; onClose
   return (
     <Modal title={esEdicion ? `Editar ${profesor!.nombre}` : 'Nuevo profesor'} onClose={onClose}>
       <form onSubmit={handleSubmit} className="space-y-4">
+        <Input
+          label="Número de identificación"
+          required
+          value={numeroIdentificacion}
+          onChange={(e) => setNumeroIdentificacion(e.target.value)}
+        />
         <Input label="Nombre" required className="uppercase" value={nombre} onChange={(e) => setNombre(e.target.value)} />
         <Input
           label="Teléfono (WhatsApp)"

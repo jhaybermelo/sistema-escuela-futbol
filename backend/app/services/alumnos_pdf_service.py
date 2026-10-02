@@ -205,15 +205,26 @@ def _dibujar_pagina(c: Canvas, doc: SimpleDocTemplate) -> None:
     _dibujar_pie(c, doc)
 
 
-def _tarjeta_info(categoria_nombre: str, anio: int, total: int) -> Table:
+def _texto_profesores(categoria: Categoria | None) -> str:
+    if not categoria:
+        return "Sin profesor asignado"
+    nombres = [p.nombre for p in categoria.profesores if p.activo]
+    return ", ".join(nombres) if nombres else "Sin profesor asignado"
+
+
+def _tarjeta_info(categoria_nombre: str, anio: int, total: int, profesor_texto: str) -> Table:
+    ancho_col = ANCHO_UTIL / 2
     data = [
         [
             Paragraph(f"<b>Categoría:</b><br/>{categoria_nombre}", _ESTILO_TARJETA),
             Paragraph(f"<b>Año:</b><br/>{anio}", _ESTILO_TARJETA),
+        ],
+        [
             Paragraph(f"<b>Total de estudiantes:</b><br/>{total}", _ESTILO_TARJETA),
-        ]
+            Paragraph(f"<b>Profesor(es):</b><br/>{profesor_texto}", _ESTILO_TARJETA),
+        ],
     ]
-    tabla = Table(data, colWidths=[ANCHO_UTIL / 3] * 3)
+    tabla = Table(data, colWidths=[ancho_col, ancho_col])
     tabla.setStyle(
         TableStyle(
             [
@@ -286,10 +297,15 @@ def generar_listado_pdf(alumnos: list[Alumno], categoria_filtrada: Categoria | N
 
     elementos: list = []
 
-    def _agregar_seccion(categoria_nombre: str, alumnos_grupo: list[Alumno]) -> None:
+    def _agregar_seccion(categoria: Categoria | None, alumnos_grupo: list[Alumno]) -> None:
         alumnos_ordenados = sorted(alumnos_grupo, key=lambda a: f"{a.nombres} {a.apellidos}".upper())
+        nombre_categoria = categoria.nombre.strip() if categoria else "Sin categoría"
         elementos.append(Paragraph("LISTADO OFICIAL DE ESTUDIANTES", _ESTILO_TITULO))
-        elementos.append(_tarjeta_info(categoria_nombre, date.today().year, len(alumnos_ordenados)))
+        elementos.append(
+            _tarjeta_info(
+                nombre_categoria, date.today().year, len(alumnos_ordenados), _texto_profesores(categoria)
+            )
+        )
         elementos.append(Spacer(1, 10 * mm))
         if alumnos_ordenados:
             elementos.append(_tabla_estudiantes(alumnos_ordenados))
@@ -297,7 +313,7 @@ def generar_listado_pdf(alumnos: list[Alumno], categoria_filtrada: Categoria | N
             elementos.append(Paragraph("No hay alumnos registrados en esta categoría.", ESTILOS["Normal"]))
 
     if categoria_filtrada is not None:
-        _agregar_seccion(categoria_filtrada.nombre.strip(), alumnos)
+        _agregar_seccion(categoria_filtrada, alumnos)
     elif alumnos:
         grupos: dict[int | None, list[Alumno]] = {}
         for alumno in alumnos:
@@ -312,8 +328,7 @@ def generar_listado_pdf(alumnos: list[Alumno], categoria_filtrada: Categoria | N
                 elementos.append(PageBreak())
             alumnos_grupo = grupos[categoria_id]
             categoria = alumnos_grupo[0].categoria
-            nombre_categoria = categoria.nombre.strip() if categoria else "Sin categoría"
-            _agregar_seccion(nombre_categoria, alumnos_grupo)
+            _agregar_seccion(categoria, alumnos_grupo)
     else:
         elementos.append(Paragraph("LISTADO OFICIAL DE ESTUDIANTES", _ESTILO_TITULO))
         elementos.append(Paragraph("No hay alumnos que coincidan con los filtros.", ESTILOS["Normal"]))

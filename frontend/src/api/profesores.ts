@@ -3,6 +3,7 @@ import type { ListResponse } from '../types'
 
 export interface Profesor {
   id: number
+  numero_identificacion: string
   nombre: string
   telefono: string
   activo: boolean
@@ -10,11 +11,13 @@ export interface Profesor {
 }
 
 export interface ProfesorCreateInput {
+  numero_identificacion: string
   nombre: string
   telefono: string
 }
 
 export interface ProfesorUpdateInput {
+  numero_identificacion?: string
   nombre?: string
   telefono?: string
   activo?: boolean

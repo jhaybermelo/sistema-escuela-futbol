@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.models.alumno import Alumno
+from app.models.categoria import Categoria
 
 
 class AlumnoRepository:
@@ -100,7 +101,9 @@ class AlumnoRepository:
         if categoria_ids_scope is not None:
             conditions.append(Alumno.categoria_id.in_(categoria_ids_scope))
 
-        stmt = select(Alumno).options(selectinload(Alumno.categoria))
+        stmt = select(Alumno).options(
+            selectinload(Alumno.categoria).selectinload(Categoria.profesores)
+        )
         for cond in conditions:
             stmt = stmt.where(cond)
         stmt = stmt.order_by(Alumno.apellidos, Alumno.nombres)

@@ -14,6 +14,12 @@ class ProfesorRepository:
         result = await self.db.execute(stmt)
         return result.scalar_one_or_none()
 
+    async def get_by_numero_identificacion(self, numero: str) -> Profesor | None:
+        result = await self.db.execute(
+            select(Profesor).where(Profesor.numero_identificacion == numero)
+        )
+        return result.scalar_one_or_none()
+
     async def list(self, page: int = 1, size: int = 20) -> tuple[list[Profesor], int]:
         count_stmt = select(func.count()).select_from(Profesor)
         total = (await self.db.execute(count_stmt)).scalar_one()

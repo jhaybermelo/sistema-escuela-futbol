@@ -25,6 +25,7 @@ logger = get_logger("usuarios", settings.LOG_DIR)
 def _to_response(profesor: Profesor) -> ProfesorResponse:
     return ProfesorResponse(
         id=profesor.id,
+        numero_identificacion=profesor.numero_identificacion,
         nombre=profesor.nombre,
         telefono=profesor.telefono,
         activo=profesor.activo,
@@ -48,7 +49,19 @@ async def list_profesores(page: int = 1, size: int = 20, db: AsyncSession = Depe
 @router.post("", response_model=ProfesorResponse, status_code=status.HTTP_201_CREATED)
 async def create_profesor(data: ProfesorCreate, db: AsyncSession = Depends(get_db)):
     repo = ProfesorRepository(db)
-    profesor = await repo.create({"nombre": data.nombre, "telefono": data.telefono, "activo": True})
+    if await repo.get_by_numero_identificacion(data.numero_identificacion):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Ya existe un profesor con ese número de identificación"
+        )
+
+    profesor = await repo.create(
+        {
+            "numero_identificacion": data.numero_identificacion,
+            "nombre": data.nombre,
+            "telefono": data.telefono,
+            "activo": True,
+        }
+    )
     await db.commit()
     profesor = await repo.get_by_id(profesor.id)
     logger.info(f"[PROFESOR_CREADO] nombre={profesor.nombre}")
