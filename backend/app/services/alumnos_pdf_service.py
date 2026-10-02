@@ -208,8 +208,8 @@ def _dibujar_pagina(c: Canvas, doc: SimpleDocTemplate) -> None:
 def _texto_profesores(categoria: Categoria | None) -> str:
     if not categoria:
         return "Sin profesor asignado"
-    nombres = [p.nombre for p in categoria.profesores if p.activo]
-    return ", ".join(nombres) if nombres else "Sin profesor asignado"
+    textos = [f"{p.nombre} (C.C. {p.numero_identificacion})" for p in categoria.profesores if p.activo]
+    return ", ".join(textos) if textos else "Sin profesor asignado"
 
 
 def _tarjeta_info(categoria_nombre: str, anio: int, total: int, profesor_texto: str) -> Table:
