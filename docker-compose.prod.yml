@@ -17,8 +17,11 @@ services:
       retries: 10
     networks:
       - escuela-futbol-net
-    # Sin "ports:" a propósito: en producción Postgres solo debe ser
-    # alcanzable dentro de la red interna de Docker, nunca desde internet.
+    # Publicado SOLO en localhost del droplet (no 0.0.0.0): nunca alcanzable desde
+    # internet, pero permite conectar un cliente como DBeaver vía túnel SSH para
+    # administración manual sin tocar la red interna de Docker.
+    ports:
+      - "127.0.0.1:5432:5432"
 
   backend:
     build: ./backend
