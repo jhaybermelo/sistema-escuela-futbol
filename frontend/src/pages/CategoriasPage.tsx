@@ -213,6 +213,7 @@ export default function CategoriasPage() {
             <Input
               label="Nombre"
               required
+              className="uppercase"
               value={form.nombre}
               onChange={(e) => setForm({ ...form, nombre: e.target.value })}
             />

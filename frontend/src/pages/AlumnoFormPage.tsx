@@ -116,12 +116,14 @@ export default function AlumnoFormPage() {
           <Input
             label="Nombres"
             required
+            className="uppercase"
             value={form.nombres}
             onChange={(e) => setForm({ ...form, nombres: e.target.value })}
           />
           <Input
             label="Apellidos"
             required
+            className="uppercase"
             value={form.apellidos}
             onChange={(e) => setForm({ ...form, apellidos: e.target.value })}
           />
@@ -146,6 +148,7 @@ export default function AlumnoFormPage() {
           <Input
             label="Nombre del acudiente"
             required
+            className="uppercase"
             value={form.acudiente_nombre}
             onChange={(e) => setForm({ ...form, acudiente_nombre: e.target.value })}
           />

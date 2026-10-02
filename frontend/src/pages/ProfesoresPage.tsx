@@ -150,7 +150,7 @@ function ProfesorFormModal({ profesor, onClose }: { profesor?: Profesor; onClose
   return (
     <Modal title={esEdicion ? `Editar ${profesor!.nombre}` : 'Nuevo profesor'} onClose={onClose}>
       <form onSubmit={handleSubmit} className="space-y-4">
-        <Input label="Nombre" required value={nombre} onChange={(e) => setNombre(e.target.value)} />
+        <Input label="Nombre" required className="uppercase" value={nombre} onChange={(e) => setNombre(e.target.value)} />
         <Input
           label="Teléfono (WhatsApp)"
           required

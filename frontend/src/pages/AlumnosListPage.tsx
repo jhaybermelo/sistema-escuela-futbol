@@ -27,11 +27,24 @@ const ESTADO_COLOR: Record<string, string> = {
 export default function AlumnosListPage() {
   const { user } = useAuth()
   const queryClient = useQueryClient()
-  const [searchParams] = useSearchParams()
-  const [page, setPage] = useState(1)
-  const [search, setSearch] = useState('')
-  const [categoriaId, setCategoriaId] = useState<string>(searchParams.get('categoria_id') ?? '')
+  const [searchParams, setSearchParams] = useSearchParams()
+  const page = Number(searchParams.get('page') ?? '1')
+  const search = searchParams.get('search') ?? ''
+  const categoriaId = searchParams.get('categoria_id') ?? ''
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false)
+
+  // Filtros guardados en la URL (no en estado local) para que se conserven al
+  // entrar al detalle de un alumno y volver con el botón "atrás" del navegador.
+  function actualizarFiltros(cambios: Record<string, string | null>) {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      for (const [clave, valor] of Object.entries(cambios)) {
+        if (valor === null || valor === '') next.delete(clave)
+        else next.set(clave, valor)
+      }
+      return next
+    })
+  }
 
   const { data, isLoading } = useQuery({
     queryKey: ['alumnos', page, search, categoriaId],
@@ -135,19 +148,13 @@ export default function AlumnosListPage() {
             placeholder="Buscar por nombre o identificación..."
             className="pl-9"
             value={search}
-            onChange={(e) => {
-              setPage(1)
-              setSearch(e.target.value)
-            }}
+            onChange={(e) => actualizarFiltros({ search: e.target.value, page: null })}
           />
         </div>
         <select
           className="rounded-md border border-slate-300 px-3 py-2 text-sm"
           value={categoriaId}
-          onChange={(e) => {
-            setPage(1)
-            setCategoriaId(e.target.value)
-          }}
+          onChange={(e) => actualizarFiltros({ categoria_id: e.target.value, page: null })}
         >
           <option value="">Todas las categorías</option>
           {categorias?.items.map((c) => (
@@ -236,7 +243,13 @@ export default function AlumnosListPage() {
               )}
             </tbody>
           </table>
-          {data && <Pagination page={data.page} pages={data.pages} onPageChange={setPage} />}
+          {data && (
+            <Pagination
+              page={data.page}
+              pages={data.pages}
+              onPageChange={(nuevaPagina) => actualizarFiltros({ page: String(nuevaPagina) })}
+            />
+          )}
         </div>
       )}
     </div>

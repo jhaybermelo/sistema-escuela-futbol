@@ -22,6 +22,11 @@ class CategoriaBase(BaseModel):
             raise ValueError("anio_nacimiento_max debe ser mayor o igual a anio_nacimiento_min")
         return v
 
+    @field_validator("nombre")
+    @classmethod
+    def _a_mayusculas(cls, v: str) -> str:
+        return v.strip().upper()
+
 
 class CategoriaCreate(CategoriaBase):
     pass
@@ -33,6 +38,11 @@ class CategoriaUpdate(BaseModel):
     anio_nacimiento_max: int | None = None
     dias_entrenamiento: list[int] | None = None
     activo: bool | None = None
+
+    @field_validator("nombre")
+    @classmethod
+    def _a_mayusculas(cls, v: str | None) -> str | None:
+        return v.strip().upper() if v is not None else v
 
 
 class CategoriaResponse(CategoriaBase):

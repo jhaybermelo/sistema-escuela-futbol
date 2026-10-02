@@ -155,11 +155,13 @@ export default function AlumnoImportPage() {
                     />
                     <Input
                       label="Nombres"
+                      className="uppercase"
                       value={fila.nombres}
                       onChange={(e) => actualizarFila(fila.fila, 'nombres', e.target.value)}
                     />
                     <Input
                       label="Apellidos"
+                      className="uppercase"
                       value={fila.apellidos}
                       onChange={(e) => actualizarFila(fila.fila, 'apellidos', e.target.value)}
                     />
@@ -171,6 +173,7 @@ export default function AlumnoImportPage() {
                     </div>
                     <Input
                       label="Acudiente"
+                      className="uppercase"
                       value={fila.acudiente_nombre}
                       onChange={(e) => actualizarFila(fila.fila, 'acudiente_nombre', e.target.value)}
                     />

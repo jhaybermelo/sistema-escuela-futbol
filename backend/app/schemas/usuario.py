@@ -1,10 +1,15 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, field_validator
 
 
 class UsuarioBase(BaseModel):
     email: EmailStr
     nombre: str
     rol: str = Field(pattern="^(admin|entrenador)$")
+
+    @field_validator("nombre")
+    @classmethod
+    def _a_mayusculas(cls, v: str) -> str:
+        return v.strip().upper()
 
 
 class UsuarioCreate(UsuarioBase):
@@ -17,6 +22,11 @@ class UsuarioUpdate(BaseModel):
     rol: str | None = Field(default=None, pattern="^(admin|entrenador)$")
     activo: bool | None = None
     password: str | None = Field(default=None, min_length=6)
+
+    @field_validator("nombre")
+    @classmethod
+    def _a_mayusculas(cls, v: str | None) -> str | None:
+        return v.strip().upper() if v is not None else v
 
 
 class UsuarioResponse(UsuarioBase):

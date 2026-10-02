@@ -136,7 +136,9 @@ class ImportacionService:
 
             errores: list[str] = []
             advertencias: list[str] = []
-            partes = nombre_completo.split()
+            # Nombres siempre en mayúsculas, sin importar cómo vengan en el CSV
+            # (ej. "Josué David Narváez Rosas") — mismo criterio que los formularios.
+            partes = nombre_completo.upper().split()
             nombres = partes[0] if partes else ""
             apellidos = " ".join(partes[1:]) if len(partes) > 1 else ""
             if not apellidos:
@@ -154,7 +156,7 @@ class ImportacionService:
                 errores.append(f"Fecha de ingreso: {e}")
                 fecha_ingreso = date.today()
 
-            nombre_padre = get(cruda, "nombre_padre")
+            nombre_padre = get(cruda, "nombre_padre").upper()
             if not nombre_padre:
                 nombre_padre = "Acudiente sin registrar"
                 advertencias.append("Falta el nombre del acudiente")
@@ -277,11 +279,13 @@ class ImportacionService:
                 alumno = await self.alumno_repo.create(
                     {
                         "numero_identificacion": fila.numero_identificacion,
-                        "nombres": fila.nombres,
-                        "apellidos": fila.apellidos,
+                        # .upper() de nuevo aquí (no solo en parse_csv) por si el admin
+                        # editó el nombre en la previsualización con minúsculas.
+                        "nombres": fila.nombres.strip().upper(),
+                        "apellidos": fila.apellidos.strip().upper(),
                         "fecha_nacimiento": fila.fecha_nacimiento,
                         "fecha_ingreso": fila.fecha_ingreso,
-                        "acudiente_nombre": fila.acudiente_nombre,
+                        "acudiente_nombre": fila.acudiente_nombre.strip().upper(),
                         "acudiente_telefono": fila.acudiente_telefono,
                         "categoria_id": categoria.id,
                         "categoria_override": False,

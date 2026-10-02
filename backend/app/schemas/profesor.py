@@ -1,9 +1,14 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 
 class ProfesorBase(BaseModel):
     nombre: str
     telefono: str
+
+    @field_validator("nombre")
+    @classmethod
+    def _a_mayusculas(cls, v: str) -> str:
+        return v.strip().upper()
 
 
 class ProfesorCreate(ProfesorBase):
@@ -14,6 +19,11 @@ class ProfesorUpdate(BaseModel):
     nombre: str | None = None
     telefono: str | None = None
     activo: bool | None = None
+
+    @field_validator("nombre")
+    @classmethod
+    def _a_mayusculas(cls, v: str | None) -> str | None:
+        return v.strip().upper() if v is not None else v
 
 
 class ProfesorResponse(ProfesorBase):

@@ -154,7 +154,7 @@ function UsuarioFormModal({ usuario, onClose }: { usuario?: Usuario; onClose: ()
   return (
     <Modal title={esEdicion ? `Editar ${usuario!.nombre}` : 'Nuevo usuario'} onClose={onClose}>
       <form onSubmit={handleSubmit} className="space-y-4">
-        <Input label="Nombre" required value={nombre} onChange={(e) => setNombre(e.target.value)} />
+        <Input label="Nombre" required className="uppercase" value={nombre} onChange={(e) => setNombre(e.target.value)} />
         <Input
           label="Email"
           type="email"

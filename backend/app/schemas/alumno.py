@@ -1,6 +1,6 @@
 from datetime import date
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, field_validator
 
 
 class AlumnoBase(BaseModel):
@@ -12,6 +12,14 @@ class AlumnoBase(BaseModel):
     acudiente_nombre: str
     acudiente_telefono: str
     acudiente_email: EmailStr | None = None
+
+    # Los nombres siempre se guardan en mayúsculas, sin importar cómo se escriban en
+    # el formulario o en un CSV importado — mantiene consistente el listado, el
+    # carnet y los recibos sin depender de que cada punto de entrada lo normalice.
+    @field_validator("nombres", "apellidos", "acudiente_nombre")
+    @classmethod
+    def _a_mayusculas(cls, v: str) -> str:
+        return v.strip().upper()
 
 
 class AlumnoCreate(AlumnoBase):
@@ -29,6 +37,11 @@ class AlumnoUpdate(BaseModel):
     acudiente_email: EmailStr | None = None
     categoria_id: int | None = None
     estado: str | None = Field(default=None, pattern="^(activo|inactivo|retirado)$")
+
+    @field_validator("nombres", "apellidos", "acudiente_nombre")
+    @classmethod
+    def _a_mayusculas(cls, v: str | None) -> str | None:
+        return v.strip().upper() if v is not None else v
 
 
 class AlumnoResponse(AlumnoBase):
